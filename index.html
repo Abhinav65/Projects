@@ -1,176 +1,302 @@
+      function deleteSchedule(id){ setState({...state, schedules: state.schedules.filter(s=>s.id!==id)}); }
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Demo — Neon Landing</title>
-  <style>
-  /* Demo styles: gradient + glassmorphism + simple responsive layout */
-  :root{
-    --bg1:#0f1724;
-    --bg2:#07102a;
-    --accent:#7c3aed;
-    --muted:rgba(255,255,255,0.75);
-    --glass:rgba(255,255,255,0.06);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,-apple-system,"Helvetica Neue",Arial;
-    background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.12), transparent),
-                radial-gradient(1000px 400px at 90% 90%, rgba(14,165,233,0.06), transparent),
-                linear-gradient(180deg,var(--bg1),var(--bg2));
-    color: #e6eef8; -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale; padding-bottom:80px;
-  }
-  .container{max-width:1100px;margin:0 auto;padding:32px}
-  .site-header{position:sticky;top:0;backdrop-filter: blur(6px);z-index:40}
-  .nav{display:flex;align-items:center;justify-content:space-between}
-  .logo{font-weight:700;color:white;text-decoration:none;font-size:1.25rem}
-  .logo span{color:var(--accent);margin-left:6px}
-  .btn{display:inline-block;padding:10px 16px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
-  .btn.primary{background:linear-gradient(90deg,var(--accent),#06b6d4);color:white;box-shadow:0 6px 18px rgba(12,12,18,0.5);}
-  .btn.outline{background:transparent;border:1px solid rgba(255,255,255,0.08);color:var(--muted)}
-  .btn.ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04)}
-  .btn.small{padding:8px 12px;font-size:0.9rem}
-  .hero{padding:60px 0;position:relative;overflow:visible}
-  .hero-grid{display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:center}
-  .title{font-size:2.1rem;margin:0}
-  @media(min-width:900px){.title{font-size:3rem}}
-  .lead{color:rgba(230,238,248,0.85);max-width:52ch}
-  .hero-art{display:flex;justify-content:center}
-  .card-glass{width:100%;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:16px;padding:22px;backdrop-filter: blur(8px);box-shadow:0 10px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.04)}
-  .card-glass h3{margin-top:0}
-  .floating-orbs{position:absolute;inset:0;pointer-events:none}
-  .orb{position:absolute;border-radius:50%;filter:blur(24px);opacity:0.35}
-  .orb:nth-child(1){width:240px;height:240px;left:-60px;top:-40px;background:linear-gradient(90deg,#7c3aed,#06b6d4)}
-  .orb:nth-child(2){width:160px;height:160px;right: -40px;top:40%;background:linear-gradient(90deg,#06b6d4,#00b894)}
-  .orb:nth-child(3){width:120px;height:120px;right:20%;bottom:-30px;background:linear-gradient(90deg,#ff6b6b,#ffd166)}
-  @keyframes floaty{0%{transform:translateY(0)}50%{transform:translateY(-18px)}100%{transform:translateY(0)}}
-  .orb{animation:floaty 6s ease-in-out infinite}
-  .features{padding:36px 0}
-  .section-title{text-align:center;margin:0 0 20px 0;font-size:1.4rem}
-  .grid{display:grid;grid-template-columns:repeat(1,1fr);gap:18px}
-  .feature{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
-  @media(min-width:700px){.grid{grid-template-columns:repeat(3,1fr)}}
-  .site-footer{position:fixed;left:0;right:0;bottom:0;padding:12px 0;text-align:center;background:linear-gradient(180deg,transparent,rgba(0,0,0,0.25))}
-  .small-muted{font-size:0.9rem;color:rgba(230,238,248,0.7)}
-  /* theme: light variant toggled by .light on body */
-  body.light{--bg1:#f7fbff;--bg2:#eef7ff;color:#0b1220}
-  body.light .logo span{color:#4f46e5}
-  body.light .card-glass{background:linear-gradient(180deg,rgba(10,10,10,0.03),rgba(10,10,10,0.01));border:1px solid rgba(2,6,23,0.04)}
-  body.light .btn.primary{box-shadow:0 6px 16px rgba(79,70,229,0.12)}
-  /* small utility */
-  .hero-ctas .btn{margin-right:12px}
-
-  /* Sparkle / confetti styles used by the small JS interaction */
-  .spark-holder{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-  .spark{position:absolute;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 6px 12px rgba(2,6,23,0.6);animation:spark 900ms ease-out}
-  @keyframes spark{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(0.6) translateY(-40px)}}
-  </style>
-  <meta name="description" content="A small demo website with glassmorphism, gradients, and subtle animations." />
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
-</head>
-<body>
-  <header class="site-header">
-    <nav class="nav container">
-      <a class="logo" href="#">Neon<span>Lab</span></a>
-      <div class="nav-actions">
-        <button id="themeToggle" class="btn ghost">Toggle Theme</button>
-      </div>
-    </nav>
-  </header>
-
-  <main>
-    <section class="hero">
-      <div class="container hero-grid">
-        <div class="hero-content">
-          <h1 class="title">Build bold experiences<br/><span class="accent">with a tiny demo site</span></h1>
-          <p class="lead">A responsive, modern landing page using gradients, glassmorphism and small JS interactions. Perfect for a portfolio, project demo, or playground.</p>
-          <p class="hero-ctas">
-            <a class="btn primary" href="#features">See features</a>
-            <a class="btn outline" href="#">Get started</a>
-          </p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EduTrack — Frontend (HTML only)</title>
+    <style>
+      :root{--bg:#071025;--card:#0f1724;--muted:#9ca3af;--accent:#4f46e5;--success:#10b981}
+      *{box-sizing:border-box}
+      body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;background:linear-gradient(180deg,var(--bg) 0%, #082436 100%);color:#e6eef8}
+      .app{max-width:1100px;margin:28px auto;padding:18px}
+      header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+      h1{margin:0;font-size:20px}
+      .muted{color:var(--muted)}
+      .card{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.03)}
+      .controls{display:flex;gap:8px;align-items:center}
+      button{background:var(--accent);border:none;color:white;padding:8px 12px;border-radius:8px;cursor:pointer}
+      button.small{padding:6px 10px}
+      button.danger{background:#dc2626}
+      button.success{background:var(--success)}
+      input,select,textarea{padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:#fff}
+      .grid{display:grid;grid-template-columns:1fr 360px;gap:14px}
+      .list{display:flex;flex-direction:column;gap:10px}
+      .item{display:flex;justify-content:space-between;gap:12px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);align-items:center}
+      .small{font-size:13px}
+      .chartWrap{height:240px}
+      footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+      .hidden{display:none}
+      .row{display:flex;gap:8px}
+      a{color:#9cc1ff}
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <div style="display:flex;gap:12px;align-items:center">
+          <h1>EduTrack</h1>
+          <div class="muted">Plan • Track • Learn</div>
         </div>
-        <div class="hero-art">
-          <div class="card-glass">
-            <h3>Interactive card</h3>
-            <p>Hover me, toggle theme, or click the button below to see small JS powered UI touches.</p>
-            <button id="sparkle" class="btn small">Sparkle ✨</button>
-          </div>
-        </div>
-      </div>
-      <div class="floating-orbs" aria-hidden="true">
-        <span class="orb"></span>
-        <span class="orb"></span>
-        <span class="orb"></span>
-      </div>
-    </section>
+        <div class="controls" id="topControls"></div>
+      </header>
 
-    <section id="features" class="features container">
-      <h2 class="section-title">Features</h2>
-      <div class="grid">
-        <article class="feature">
-          <h3>Responsive</h3>
-          <p>Looks great on phones, tablets, and desktops.</p>
-        </article>
-        <article class="feature">
-          <h3>Animated</h3>
-          <p>Subtle motion adds life without distraction.</p>
-        </article>
-        <article class="feature">
-          <h3>Easy to edit</h3>
-          <p>Simple HTML/CSS/JS you can fork and expand.</p>
-        </article>
-      </div>
-    </section>
+      <main id="main" />
 
-  </main>
-
-  <footer class="site-footer">
-    <div class="container">
-      <p>Made with ♥ — demo site • Small interactions included</p>
+      <footer>
+        Frontend-only demo (HTML + vanilla JS). Data is stored in localStorage.
+      </footer>
     </div>
-  </footer>
 
-  <script>
-  // Small interactions: theme toggle, sparkle button
-  (function(){
-    const themeBtn = document.getElementById('themeToggle');
-    const sparkle = document.getElementById('sparkle');
-    const body = document.body;
-    // init
-    const saved = localStorage.getItem('demo-theme');
-    if(saved === 'light') body.classList.add('light');
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    themeBtn.addEventListener('click', () => {
-      const isLight = body.classList.toggle('light');
-      localStorage.setItem('demo-theme', isLight ? 'light' : 'dark');
-      themeBtn.textContent = isLight ? 'Dark mode' : 'Light mode';
-    });
+    <script>
+    (function(){
+      // Single-file EduTrack (vanilla JS)
+      const STORAGE_KEY = 'edutrack_html_v1';
 
-    // sparkle: brief confetti-like sparkles using DOM
-    function smallSparkle(el){
-      for(let i=0;i<18;i++){
-        const s = document.createElement('span');
-        s.className = 'spark';
-        s.style.left = Math.random()*100 + '%';
-        s.style.top = Math.random()*100 + '%';
-        s.style.background = ['#7c3aed','#06b6d4','#ffd166','#ff6b6b'][Math.floor(Math.random()*4)];
-        el.appendChild(s);
-        setTimeout(()=> s.remove(), 900);
+      // Utilities
+      function uid(){ return 'id-' + Math.random().toString(36).slice(2,10) }
+      function today(){ const d = new Date(); return d.toISOString().slice(0,10) }
+      function load(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) }catch(e){return null} }
+      function save(state){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)) }
+
+      // Default state
+      const DEFAULT = {
+        users: {}, currentUser: null, token: null,
+        tasks:[
+          {id:uid(), title:'Intro essay', due: today(), status:'todo', priority:'high', created: today(), completedAt:null},
+        ],
+        schedules:[ {id:uid(), title:'Study: Physics', date: today(), time:'18:00', duration:60, notes:''} ],
+        resources:[],
+        profile:{displayName:'Student', major:''}
       }
-    }
-    sparkle.addEventListener('click', (e)=>{
-      const holder = document.createElement('div');
-      holder.className='spark-holder';
-      holder.style.position='absolute';
-      holder.style.left='0';holder.style.top='0';holder.style.width='100%';holder.style.height='100%';holder.style.pointerEvents='none';
-      document.body.appendChild(holder);
-      smallSparkle(holder);
-      setTimeout(()=> holder.remove(), 1000);
-    });
-  })();
-  </script>
-</body>
+
+      let state = load() || DEFAULT
+
+      // DOM refs
+      const main = document.getElementById('main')
+      const topControls = document.getElementById('topControls')
+
+      // --- Auth (mock) ---
+      function fakeJWT(payload){ return btoa(JSON.stringify(payload)) + '.' + btoa(Math.random().toString(36)) }
+      function signup(username,password,displayName){
+        if(!username||!password) throw new Error('username & password required')
+        if(state.users[username]) throw new Error('User exists')
+        state.users[username] = {passwordHash:btoa(password), displayName:displayName||username}
+        state.currentUser = username
+        state.token = fakeJWT({sub:username,iat:Date.now()})
+        state.profile.displayName = displayName||username
+        save(state)
+        render()
+      }
+      function login(username,password){
+        const u = state.users[username]
+        if(!u) throw new Error('No such user')
+        if(u.passwordHash !== btoa(password)) throw new Error('Bad credentials')
+        state.currentUser = username
+        state.token = fakeJWT({sub:username,iat:Date.now()})
+        state.profile.displayName = u.displayName || username
+        save(state); render()
+      }
+      function logout(){ state.currentUser = null; state.token = null; save(state); render() }
+
+      // --- Task management ---
+      function addTask(title,due,priority){ const t={id:uid(),title,due:due||today(),status:'todo',priority:priority||'medium',created:today(),completedAt:null}; state.tasks.unshift(t); save(state); render(); }
+      function updateTask(id,patch){ state.tasks = state.tasks.map(t=> t.id===id? {...t,...patch}:t); save(state); render(); }
+      function deleteTask(id){ state.tasks = state.tasks.filter(t=>t.id!==id); save(state); render(); }
+
+      // --- Schedule management ---
+      function addSchedule(title,date,time){ const s={id:uid(),title,date,time,duration:60,notes:''}; state.schedules.unshift(s); save(state); render(); }
+      function deleteSchedule(id){ state.schedules = state.schedules.filter(s=>s.id!==id); save(state); render(); }
+
+      // --- Resources ---
+      async function searchResources(q){
+        if(!q) return []
+        try{
+          const res = await fetch('https://openlibrary.org/search.json?q=' + encodeURIComponent(q))
+          if(!res.ok) throw new Error('Network')
+          const data = await res.json()
+          const items = (data.docs||[]).slice(0,12).map(d=>({id:d.key,title:d.title,author:(d.author_name||[]).slice(0,2).join(', '),year:d.first_publish_year,url:'https://openlibrary.org'+d.key,cover:d.cover_edition_key?('https://covers.openlibrary.org/b/olid/'+d.cover_edition_key+'-M.jpg'):null}))
+          state.resources = items; save(state); render()
+        }catch(e){ state.resources = [{id:'m1',title:'Offline resource: '+q,author:'Curated',year:2020}]; save(state); render() }
+      }
+
+      // --- UI render helpers ---
+      function clear(node){ while(node.firstChild) node.removeChild(node.firstChild) }
+
+      function renderTopControls(){
+        clear(topControls)
+        if(state.currentUser){
+          const name = document.createElement('div'); name.textContent = state.profile.displayName; name.className='muted'
+          topControls.appendChild(name)
+          const btns = ['Dashboard','Planner','Tasks','Resources','Profile']
+          btns.forEach(r=>{ const b=document.createElement('button'); b.textContent=r; b.onclick=()=> navigate(r.toLowerCase()); topControls.appendChild(b) })
+          const lo = document.createElement('button'); lo.textContent='Log out'; lo.className='danger'; lo.onclick=logout; topControls.appendChild(lo)
+        } else {
+          const li = document.createElement('button'); li.textContent='Log in'; li.onclick=()=> navigate('login'); topControls.appendChild(li)
+          const su = document.createElement('button'); su.textContent='Sign up'; su.onclick=()=> navigate('signup'); topControls.appendChild(su)
+        }
+      }
+
+      let currentView = 'home'
+      function navigate(view){ currentView = view; render() }
+
+      // Main render
+      function render(){
+        renderTopControls()
+        clear(main)
+        if(!state.currentUser && currentView==='home'){
+          const c = document.createElement('div'); c.className='card'
+          c.innerHTML = `<h2>Welcome to EduTrack</h2><p class='muted'>A frontend-only HTML demo. Sign up to save your data locally.</p>`
+          main.appendChild(c)
+          return
+        }
+
+        if(!state.currentUser && currentView==='signup'){
+          main.appendChild(signupView())
+          return
+        }
+        if(!state.currentUser && currentView==='login'){
+          main.appendChild(loginView()); return
+        }
+
+        // Authenticated views
+        if(state.currentUser && currentView==='dashboard'){
+          main.appendChild(dashboardView()); return
+        }
+        if(state.currentUser && currentView==='tasks'){
+          main.appendChild(tasksView()); return
+        }
+        if(state.currentUser && currentView==='planner'){
+          main.appendChild(plannerView()); return
+        }
+        if(state.currentUser && currentView==='resources'){
+          main.appendChild(resourcesView()); return
+        }
+        if(state.currentUser && currentView==='profile'){
+          main.appendChild(profileView()); return
+        }
+
+        // default after login
+        if(state.currentUser && currentView==='home') { currentView='dashboard'; render(); }
+      }
+
+      // --- Views ---
+      function signupView(){
+        const c = document.createElement('div'); c.className='card'
+        c.innerHTML = `<h2>Create account</h2>`
+        const f = document.createElement('div'); f.className='row'; f.style.marginTop='8px'
+        const u = document.createElement('input'); u.placeholder='username'
+        const n = document.createElement('input'); n.placeholder='display name'
+        const p = document.createElement('input'); p.type='password'; p.placeholder='password'
+        const wrap = document.createElement('div'); wrap.style.marginTop='8px';
+        const btn = document.createElement('button'); btn.textContent='Create'; btn.onclick=()=>{
+          try{ signup(u.value.trim(), p.value, n.value.trim()); currentView='dashboard' }catch(e){ alert(e.message) }
+        }
+        const can = document.createElement('button'); can.textContent='Cancel'; can.className='danger'; can.onclick=()=>{ currentView='home'; render() }
+        wrap.appendChild(btn); wrap.appendChild(can)
+        c.appendChild(u); c.appendChild(document.createElement('div')); c.appendChild(n); c.appendChild(document.createElement('div')); c.appendChild(p); c.appendChild(wrap)
+        return c
+      }
+
+      function loginView(){
+        const c = document.createElement('div'); c.className='card'
+        c.innerHTML = `<h2>Log in</h2>`
+        const u = document.createElement('input'); u.placeholder='username'
+        const p = document.createElement('input'); p.type='password'; p.placeholder='password'
+        const wrap = document.createElement('div'); wrap.style.marginTop='8px'
+        const btn = document.createElement('button'); btn.textContent='Sign in'; btn.onclick=()=>{ try{ login(u.value.trim(), p.value); currentView='dashboard' }catch(e){ alert(e.message) } }
+        const can = document.createElement('button'); can.textContent='Cancel'; can.className='danger'; can.onclick=()=>{ currentView='home'; render() }
+        wrap.appendChild(btn); wrap.appendChild(can)
+        c.appendChild(u); c.appendChild(document.createElement('div')); c.appendChild(p); c.appendChild(wrap)
+        return c
+      }
+
+      function dashboardView(){
+        const wrap = document.createElement('div'); wrap.className='grid'
+        const left = document.createElement('div');
+        const right = document.createElement('div');
+
+        // Analytics card
+        const analytics = document.createElement('div'); analytics.className='card'
+        analytics.innerHTML = `<h3>Analytics</h3><div id='analyticsSummary' style='display:flex;gap:12px;align-items:center'></div><div class='chartWrap'><canvas id='statusChart'></canvas></div>`
+        left.appendChild(analytics)
+
+        // Upcoming card
+        const upcoming = document.createElement('div'); upcoming.className='card'; upcoming.innerHTML=`<h3>Upcoming</h3>`
+        const ul = document.createElement('div'); ul.className='list'
+        state.schedules.slice(0,6).forEach(s=>{ const it = document.createElement('div'); it.className='item'; it.innerHTML=`<div><strong>${escapeHtml(s.title)}</strong><div class='small muted'>${s.date} • ${s.time}</div></div><div class='pill small'>Schedule</div>`; ul.appendChild(it) })
+        state.tasks.slice(0,6).forEach(t=>{ const it = document.createElement('div'); it.className='item'; it.innerHTML=`<div><strong>${escapeHtml(t.title)}</strong><div class='small muted'>Due: ${t.due} • ${t.priority}</div></div><div class='pill small'>${t.status}</div>`; ul.appendChild(it) })
+        upcoming.appendChild(ul); left.appendChild(upcoming)
+
+        // Right column: Quick Add, Search
+        const quick = document.createElement('div'); quick.className='card'; quick.innerHTML=`<h3>Quick Add</h3>`
+        const qForm = document.createElement('div'); qForm.className='row'
+        const qInput = document.createElement('input'); qInput.placeholder='Quick task title'
+        const qBtn = document.createElement('button'); qBtn.textContent='Add'; qBtn.onclick=()=>{ if(!qInput.value) return; addTask(qInput.value); qInput.value=''; }
+        qForm.appendChild(qInput); qForm.appendChild(qBtn); quick.appendChild(qForm)
+
+        const searchCard = document.createElement('div'); searchCard.className='card'; searchCard.innerHTML=`<h3>Resource Search</h3>`
+        const sform = document.createElement('div'); sform.className='row'
+        const sInput = document.createElement('input'); sInput.placeholder='Search resources (books, guides)'
+        const sBtn = document.createElement('button'); sBtn.textContent='Search'; sBtn.onclick=()=>{ searchResources(sInput.value.trim()) }
+        sform.appendChild(sInput); sform.appendChild(sBtn); searchCard.appendChild(sform)
+
+        const profileCard = document.createElement('div'); profileCard.className='card'; profileCard.innerHTML=`<h3>Profile</h3><div class='muted small'>${escapeHtml(state.profile.displayName)} • ${escapeHtml(state.profile.major || '')}</div>`
+
+        right.appendChild(quick); right.appendChild(searchCard); right.appendChild(profileCard)
+
+        wrap.appendChild(left); wrap.appendChild(right)
+        // Render wrap
+        const container = document.createElement('div'); container.appendChild(wrap)
+
+        // After appended, render charts
+        setTimeout(()=>{
+          renderStatusChart()
+          renderSummary()
+        },10)
+
+        return container
+      }
+
+      function renderSummary(){ const el = document.getElementById('analyticsSummary'); if(!el) return; const completed = state.tasks.filter(t=>t.status==='done').length; const total = state.tasks.length||0; el.innerHTML = `<div class='card' style='padding:10px'><div class='muted small'>Tasks completed</div><div style='font-weight:700;font-size:18px'>${completed} / ${total}</div></div>` }
+
+      let statusChart = null
+      function renderStatusChart(){ const ctx = document.getElementById('statusChart').getContext('2d'); const byStatus = state.tasks.reduce((acc,t)=>{ acc[t.status] = (acc[t.status]||0)+1; return acc },{}); const labels = Object.keys(byStatus); const data = Object.values(byStatus); if(statusChart) statusChart.destroy(); statusChart = new Chart(ctx,{type:'bar',data:{labels, datasets:[{label:'Tasks',data, backgroundColor:['#4f46e5','#06b6d4','#10b981']} ]}, options:{plugins:{legend:{display:false}}}}) }
+
+      function tasksView(){ const c = document.createElement('div'); c.className='card'; c.innerHTML=`<h3>Task Tracker</h3>`; const form = document.createElement('div'); form.className='row'; const t = document.createElement('input'); t.placeholder='Task title'; const d = document.createElement('input'); d.type='date'; const add = document.createElement('button'); add.textContent='Add'; add.onclick=()=>{ if(!t.value) return; addTask(t.value,d.value); t.value=''; d.value=''; }
+        form.appendChild(t); form.appendChild(d); form.appendChild(add); c.appendChild(form);
+        const list = document.createElement('div'); list.style.marginTop='12px'; list.className='list'; state.tasks.forEach(task=>{ const it = document.createElement('div'); it.className='item'; const info = document.createElement('div'); info.innerHTML=`<div style='font-weight:700'>${escapeHtml(task.title)}</div><div class='small muted'>Due: ${task.due} • ${task.priority}</div>`; const actions = document.createElement('div'); actions.style.display='flex'; actions.style.gap='8px'; const done = document.createElement('button'); done.textContent='Done'; done.className='success'; done.onclick=()=>updateTask(task.id,{status:'done',completedAt:today()}); const toggle = document.createElement('button'); toggle.textContent='Toggle'; toggle.onclick=()=>updateTask(task.id,{status: task.status==='todo'?'in-progress':'todo'}); const del = document.createElement('button'); del.textContent='Del'; del.className='danger'; del.onclick=()=>{ if(confirm('Delete task?')) deleteTask(task.id) }; actions.appendChild(done); actions.appendChild(toggle); actions.appendChild(del); it.appendChild(info); it.appendChild(actions); list.appendChild(it) }); c.appendChild(list); return c }
+
+      function plannerView(){ const container = document.createElement('div'); container.className='grid'; const left = document.createElement('div'); const right = document.createElement('div'); const card = document.createElement('div'); card.className='card'; card.innerHTML=`<h3>Study Planner</h3>`; const f = document.createElement('div'); f.className='row'; const title = document.createElement('input'); title.placeholder='Session title'; const date = document.createElement('input'); date.type='date'; const time = document.createElement('input'); time.type='time'; time.value='18:00'; const add = document.createElement('button'); add.textContent='Add'; add.onclick=()=>{ if(!title.value||!date.value) return; addSchedule(title.value,date.value,time.value); title.value=''; date.value=''; }
+        f.appendChild(title); f.appendChild(date); f.appendChild(time); f.appendChild(add); card.appendChild(f);
+        const list = document.createElement('div'); list.className='list'; list.style.marginTop='12px'; state.schedules.forEach(s=>{ const it = document.createElement('div'); it.className='item'; it.innerHTML=`<div><strong>${escapeHtml(s.title)}</strong><div class='small muted'>${s.date} • ${s.time}</div></div>`; const actions = document.createElement('div'); const copy = document.createElement('button'); copy.textContent='Copy'; copy.onclick=()=>navigator.clipboard?.writeText(`${s.title} - ${s.date} ${s.time}`); const del = document.createElement('button'); del.textContent='Del'; del.className='danger'; del.onclick=()=>{ if(confirm('Delete schedule?')) deleteSchedule(s.id) }; actions.appendChild(copy); actions.appendChild(del); it.appendChild(actions); list.appendChild(it) }); card.appendChild(list); left.appendChild(card);
+        const stats = document.createElement('div'); stats.className='card'; stats.innerHTML=`<h3>Analytics History</h3><canvas id='areaChart'></canvas>`; right.appendChild(stats); container.appendChild(left); container.appendChild(right);
+        setTimeout(()=>renderAreaChart(),10); return container }
+
+      function renderAreaChart(){ const ctx = document.getElementById('areaChart').getContext('2d'); const days = 7; const labels = Array.from({length:days}).map((_,i)=>{ const d = new Date(); d.setDate(d.getDate()- (days-1-i)); return d.toISOString().slice(0,10) }); const counts = labels.map(l=> state.tasks.filter(t=> t.completedAt===l).length ); if(window._areaChart) window._areaChart.destroy(); window._areaChart = new Chart(ctx,{type:'line',data:{labels, datasets:[{label:'Completed',data:counts,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,0.12)',fill:true}]}, options:{plugins:{legend:{display:false}}}}) }
+
+      function resourcesView(){ const c = document.createElement('div'); c.className='card'; c.innerHTML=`<h3>Resource Library</h3>`; const list = document.createElement('div'); list.className='list'; list.style.marginTop='8px'; if(state.resources.length===0){ const m = document.createElement('div'); m.className='muted'; m.textContent = 'Search for resources using the dashboard search.'; list.appendChild(m) } else { state.resources.forEach(r=>{ const it = document.createElement('div'); it.className='item'; const info = document.createElement('div'); info.innerHTML=`<div style='font-weight:700'>${escapeHtml(r.title)}</div><div class='small muted'>${escapeHtml(r.author||'')} ${r.year? '• '+r.year: ''}</div>`; const right = document.createElement('div'); if(r.cover){ const img = document.createElement('img'); img.src=r.cover; img.style.height='60px'; img.style.borderRadius='6px'; img.onerror=()=>img.style.display='none'; right.appendChild(img) } const a = document.createElement('a'); a.href = r.url || '#'; a.target='_blank'; a.textContent = 'Open'; right.appendChild(a); it.appendChild(info); it.appendChild(right); list.appendChild(it) }) }
+        c.appendChild(list); return c }
+
+      function profileView(){ const c = document.createElement('div'); c.className='card'; c.innerHTML=`<h3>Profile</h3>`; const name = document.createElement('input'); name.value = state.profile.displayName || ''; const major = document.createElement('input'); major.value = state.profile.major || ''; const s = document.createElement('button'); s.textContent='Save'; s.onclick=()=>{ state.profile.displayName = name.value; state.profile.major = major.value; save(state); alert('Saved'); render() }; c.appendChild(name); c.appendChild(document.createElement('div')); c.appendChild(major); c.appendChild(document.createElement('div')); c.appendChild(s); return c }
+
+      // simple HTML escape
+      function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&"'<>]/g, function(m){ return {'&':'&amp;','"':'&quot;',"'":'&#39;','<':'&lt;','>':'&gt;'}[m] }) }
+
+      // initial view
+      currentView = state.currentUser ? 'dashboard' : 'home'
+      render()
+
+      // small helpers to re-render charts when state changes from outside views
+      window.addTask = addTask
+      window.searchResources = (q)=> searchResources(q || '')
+      window.renderStatusChart = renderStatusChart
+      window.renderAreaChart = renderAreaChart
+
+    })()
+    </script>
+  </body>
 </html>
